@@ -69,222 +69,284 @@ class Analytics extends Component
             return $current === 0 ? 0.0 : null;
         }
 
-        return round(
-            (($current - $previous) / $previous) * 100,
-            1
-        );
+        return round((($current - $previous) / $previous) * 100, 1);
+    }
+
+    private function getDateRanges(int $days): array
+    {
+        return [
+            'currentStart' => "{$days}daysAgo",
+            'currentEnd' => 'yesterday',
+            'previousStart' => ($days * 2) . 'daysAgo',
+            'previousEnd' => ($days + 1) . 'daysAgo',
+        ];
     }
 
     public function getOverview(int $days = 30): array
     {
-        return $this->remember("overview-comparison:{$days}days", function() use ($days) {
-            $client = $this->getClient();
+        return $this->remember(
+            "overview-comparison:{$days}days",
+            function() use ($days) {
+                $client = $this->getClient();
+                $ranges = $this->getDateRanges($days);
 
-            $currentStart = "{$days}daysAgo";
-            $previousStart = ($days * 2) . "daysAgo";
-            $previousEnd = ($days + 1) . "daysAgo";
+                $response = $client->runReport(
+                    new RunReportRequest([
+                        'property' => 'properties/' . $this->getPropertyId(),
+                        'date_ranges' => [
+                            new DateRange([
+                                'start_date' => $ranges['currentStart'],
+                                'end_date' => $ranges['currentEnd'],
+                                'name' => 'current',
+                            ]),
+                            new DateRange([
+                                'start_date' => $ranges['previousStart'],
+                                'end_date' => $ranges['previousEnd'],
+                                'name' => 'previous',
+                            ]),
+                        ],
+                        'metrics' => [
+                            new Metric(['name' => 'activeUsers']),
+                            new Metric(['name' => 'sessions']),
+                            new Metric(['name' => 'screenPageViews']),
+                        ],
+                    ])
+                );
 
-            $response = $client->runReport(
-                new RunReportRequest([
-                    'property' => 'properties/' . $this->getPropertyId(),
-                    'date_ranges' => [
-                        new DateRange([
-                            'start_date' => $currentStart,
-                            'end_date' => 'yesterday',
-                            'name' => 'current',
-                        ]),
-                        new DateRange([
-                            'start_date' => $previousStart,
-                            'end_date' => $previousEnd,
-                            'name' => 'previous',
-                        ]),
-                    ],
-                    'metrics' => [
-                        new Metric(['name' => 'activeUsers']),
-                        new Metric(['name' => 'sessions']),
-                        new Metric(['name' => 'screenPageViews']),
-                    ],
-                ])
-            );
-
-            $current = [
-                'users' => 0,
-                'sessions' => 0,
-                'pageViews' => 0,
-            ];
-
-            $previous = [
-                'users' => 0,
-                'sessions' => 0,
-                'pageViews' => 0,
-            ];
-
-            foreach ($response->getRows() as $row) {
-                $values = $row->getMetricValues();
-                $rangeName = $row->getDimensionValues()[0]->getValue();
-
-                $data = [
-                    'users' => (int) $values[0]->getValue(),
-                    'sessions' => (int) $values[1]->getValue(),
-                    'pageViews' => (int) $values[2]->getValue(),
+                $current = [
+                    'users' => 0,
+                    'sessions' => 0,
+                    'pageViews' => 0,
                 ];
 
-                if ($rangeName === 'current') {
-                    $current = $data;
-                } elseif ($rangeName === 'previous') {
-                    $previous = $data;
-                }
-            }
+                $previous = [
+                    'users' => 0,
+                    'sessions' => 0,
+                    'pageViews' => 0,
+                ];
 
-            return [
-                'users' => $current['users'],
-                'sessions' => $current['sessions'],
-                'pageViews' => $current['pageViews'],
-                'changes' => [
-                    'users' => $this->calculateChange(
-                        $current['users'],
-                        $previous['users']
-                    ),
-                    'sessions' => $this->calculateChange(
-                        $current['sessions'],
-                        $previous['sessions']
-                    ),
-                    'pageViews' => $this->calculateChange(
-                        $current['pageViews'],
-                        $previous['pageViews']
-                    ),
-                ],
-            ];
-        });
+                foreach ($response->getRows() as $row) {
+                    $values = $row->getMetricValues();
+                    $rangeName = $row
+                        ->getDimensionValues()[0]
+                        ->getValue();
+
+                    $data = [
+                        'users' => (int) $values[0]->getValue(),
+                        'sessions' => (int) $values[1]->getValue(),
+                        'pageViews' => (int) $values[2]->getValue(),
+                    ];
+
+                    if ($rangeName === 'current') {
+                        $current = $data;
+                    } elseif ($rangeName === 'previous') {
+                        $previous = $data;
+                    }
+                }
+
+                return [
+                    'users' => $current['users'],
+                    'sessions' => $current['sessions'],
+                    'pageViews' => $current['pageViews'],
+                    'changes' => [
+                        'users' => $this->calculateChange(
+                            $current['users'],
+                            $previous['users']
+                        ),
+                        'sessions' => $this->calculateChange(
+                            $current['sessions'],
+                            $previous['sessions']
+                        ),
+                        'pageViews' => $this->calculateChange(
+                            $current['pageViews'],
+                            $previous['pageViews']
+                        ),
+                    ],
+                ];
+            }
+        );
     }
 
     public function getDailyViews(int $days = 30): array
     {
-        return $this->remember("daily-views:{$days}days", function() use ($days) {
-            $client = $this->getClient();
+        return $this->remember(
+            "daily-views:{$days}days",
+            function() use ($days) {
+                $client = $this->getClient();
+                $ranges = $this->getDateRanges($days);
 
-            $response = $client->runReport(
-                new RunReportRequest([
-                    'property' => 'properties/' . $this->getPropertyId(),
-                    'date_ranges' => [
-                        new DateRange([
-                            'start_date' => "{$days}daysAgo",
-                            'end_date' => 'yesterday',
-                        ]),
-                    ],
-                    'dimensions' => [
-                        new Dimension(['name' => 'date']),
-                    ],
-                    'metrics' => [
-                        new Metric(['name' => 'screenPageViews']),
-                    ],
-                    'order_bys' => [
-                        new OrderBy([
-                            'dimension' => new OrderBy\DimensionOrderBy([
-                                'dimension_name' => 'date',
+                $response = $client->runReport(
+                    new RunReportRequest([
+                        'property' => 'properties/' . $this->getPropertyId(),
+                        'date_ranges' => [
+                            new DateRange([
+                                'start_date' => $ranges['currentStart'],
+                                'end_date' => $ranges['currentEnd'],
                             ]),
-                        ]),
-                    ],
-                ])
-            );
+                        ],
+                        'dimensions' => [
+                            new Dimension(['name' => 'date']),
+                        ],
+                        'metrics' => [
+                            new Metric(['name' => 'screenPageViews']),
+                        ],
+                        'order_bys' => [
+                            new OrderBy([
+                                'dimension' => new OrderBy\DimensionOrderBy([
+                                    'dimension_name' => 'date',
+                                ]),
+                            ]),
+                        ],
+                    ])
+                );
 
-            $views = [];
+                $viewsByDate = [];
 
-            foreach ($response->getRows() as $row) {
-                $views[] = (int) $row->getMetricValues()[0]->getValue();
+                foreach ($response->getRows() as $row) {
+                    $date = $row
+                        ->getDimensionValues()[0]
+                        ->getValue();
+
+                    $viewsByDate[$date] = (int) $row
+                        ->getMetricValues()[0]
+                        ->getValue();
+                }
+
+                $views = [];
+
+                $timezone = new \DateTimeZone(
+                    Craft::$app->getTimeZone()
+                );
+
+                $end = new \DateTimeImmutable(
+                    'yesterday',
+                    $timezone
+                );
+
+                $start = $end->modify(
+                    '-' . ($days - 1) . ' days'
+                );
+
+                for (
+                    $date = $start;
+                    $date <= $end;
+                    $date = $date->modify('+1 day')
+                ) {
+                    $key = $date->format('Ymd');
+
+                    $views[] = $viewsByDate[$key] ?? 0;
+                }
+
+                return $views;
             }
-
-            return $views;
-        });
+        );
     }
 
     public function getTopPages(int $days = 30): array
     {
-        return $this->remember("top-pages:{$days}days", function() use ($days) {
-            $client = $this->getClient();
+        return $this->remember(
+            "top-pages:{$days}days",
+            function() use ($days) {
+                $client = $this->getClient();
+                $ranges = $this->getDateRanges($days);
 
-            $response = $client->runReport(
-                new RunReportRequest([
-                    'property' => 'properties/' . $this->getPropertyId(),
-                    'date_ranges' => [
-                        new DateRange([
-                            'start_date' => "{$days}daysAgo",
-                            'end_date' => 'yesterday',
-                        ]),
-                    ],
-                    'dimensions' => [
-                        new Dimension(['name' => 'pageTitle']),
-                    ],
-                    'metrics' => [
-                        new Metric(['name' => 'screenPageViews']),
-                    ],
-                    'order_bys' => [
-                        new OrderBy([
-                            'metric' => new OrderBy\MetricOrderBy([
-                                'metric_name' => 'screenPageViews',
+                $response = $client->runReport(
+                    new RunReportRequest([
+                        'property' => 'properties/' . $this->getPropertyId(),
+                        'date_ranges' => [
+                            new DateRange([
+                                'start_date' => $ranges['currentStart'],
+                                'end_date' => $ranges['currentEnd'],
                             ]),
-                            'desc' => true,
-                        ]),
-                    ],
-                    'limit' => 5,
-                ])
-            );
+                        ],
+                        'dimensions' => [
+                            new Dimension(['name' => 'pageTitle']),
+                        ],
+                        'metrics' => [
+                            new Metric(['name' => 'screenPageViews']),
+                        ],
+                        'order_bys' => [
+                            new OrderBy([
+                                'metric' => new OrderBy\MetricOrderBy([
+                                    'metric_name' => 'screenPageViews',
+                                ]),
+                                'desc' => true,
+                            ]),
+                        ],
+                        'limit' => 5,
+                    ])
+                );
 
-            $pages = [];
+                $pages = [];
 
-            foreach ($response->getRows() as $row) {
-                $pages[] = [
-                    'title' => $row->getDimensionValues()[0]->getValue(),
-                    'views' => (int) $row->getMetricValues()[0]->getValue(),
-                ];
+                foreach ($response->getRows() as $row) {
+                    $pages[] = [
+                        'title' => $row
+                            ->getDimensionValues()[0]
+                            ->getValue(),
+                        'views' => (int) $row
+                            ->getMetricValues()[0]
+                            ->getValue(),
+                    ];
+                }
+
+                return $pages;
             }
-
-            return $pages;
-        });
+        );
     }
 
     public function getTrafficSources(int $days = 30): array
     {
-        return $this->remember("traffic-sources:{$days}days", function() use ($days) {
-            $client = $this->getClient();
+        return $this->remember(
+            "traffic-sources:{$days}days",
+            function() use ($days) {
+                $client = $this->getClient();
+                $ranges = $this->getDateRanges($days);
 
-            $response = $client->runReport(
-                new RunReportRequest([
-                    'property' => 'properties/' . $this->getPropertyId(),
-                    'date_ranges' => [
-                        new DateRange([
-                            'start_date' => "{$days}daysAgo",
-                            'end_date' => 'yesterday',
-                        ]),
-                    ],
-                    'dimensions' => [
-                        new Dimension(['name' => 'sessionSource']),
-                    ],
-                    'metrics' => [
-                        new Metric(['name' => 'sessions']),
-                    ],
-                    'order_bys' => [
-                        new OrderBy([
-                            'metric' => new OrderBy\MetricOrderBy([
-                                'metric_name' => 'sessions',
+                $response = $client->runReport(
+                    new RunReportRequest([
+                        'property' => 'properties/' . $this->getPropertyId(),
+                        'date_ranges' => [
+                            new DateRange([
+                                'start_date' => $ranges['currentStart'],
+                                'end_date' => $ranges['currentEnd'],
                             ]),
-                            'desc' => true,
-                        ]),
-                    ],
-                    'limit' => 5,
-                ])
-            );
+                        ],
+                        'dimensions' => [
+                            new Dimension([
+                                'name' => 'sessionSource',
+                            ]),
+                        ],
+                        'metrics' => [
+                            new Metric(['name' => 'sessions']),
+                        ],
+                        'order_bys' => [
+                            new OrderBy([
+                                'metric' => new OrderBy\MetricOrderBy([
+                                    'metric_name' => 'sessions',
+                                ]),
+                                'desc' => true,
+                            ]),
+                        ],
+                        'limit' => 5,
+                    ])
+                );
 
-            $sources = [];
+                $sources = [];
 
-            foreach ($response->getRows() as $row) {
-                $sources[] = [
-                    'source' => $row->getDimensionValues()[0]->getValue(),
-                    'sessions' => (int) $row->getMetricValues()[0]->getValue(),
-                ];
+                foreach ($response->getRows() as $row) {
+                    $sources[] = [
+                        'source' => $row
+                            ->getDimensionValues()[0]
+                            ->getValue(),
+                        'sessions' => (int) $row
+                            ->getMetricValues()[0]
+                            ->getValue(),
+                    ];
+                }
+
+                return $sources;
             }
-
-            return $sources;
-        });
+        );
     }
 }

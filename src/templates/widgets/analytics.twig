@@ -104,42 +104,52 @@
             </span>
         </div>
 
-        {% set chartWidth = 600 %}
-        {% set chartHeight = 140 %}
-        {% set chartPadding = 4 %}
-        {% set maxValue = max(dailyViews) %}
-        {% set minValue = min(dailyViews) %}
-        {% set range = maxValue - minValue %}
+        {% if dailyViews|length > 1 %}
+            {% set chartWidth = 600 %}
+            {% set chartHeight = 140 %}
+            {% set chartPadding = 4 %}
+            {% set maxViews = max(dailyViews) %}
+            {% set minViews = min(dailyViews) %}
+            {% set range = maxViews - minViews %}
+            {% set points = [] %}
 
-        {% set points = [] %}
+            {% for views in dailyViews %}
+                {% set x = loop.index0 / (dailyViews|length - 1) * chartWidth %}
 
-        {% for value in dailyViews %}
-            {% set x = loop.index0 / (dailyViews|length - 1) * chartWidth %}
+                {% if range > 0 %}
+                    {% set y = chartPadding
+                        + ((maxViews - views) / range)
+                        * (chartHeight - (chartPadding * 2))
+                    %}
+                {% else %}
+                    {% set y = chartHeight / 2 %}
+                {% endif %}
 
-            {% set y = chartPadding + (
-                chartHeight - (chartPadding * 2)
-            ) * (
-                1 - ((value - minValue) / range)
-            ) %}
+                {% set points = points|merge([x ~ ',' ~ y]) %}
+            {% endfor %}
 
-            {% set points = points|merge([
-                x ~ ',' ~ y
-            ]) %}
-        {% endfor %}
-
-        <div class="analytics-chart">
-            <svg
-                viewBox="0 0 {{ chartWidth }} {{ chartHeight }}"
-                preserveAspectRatio="none"
-                role="img"
-                aria-label="Page views over the last 30 days"
-            >
-                <polyline
-                    class="analytics-chart__line"
-                    points="{{ points|join(' ') }}"
-                />
-            </svg>
-        </div>
+            <div class="analytics-chart">
+                <svg
+                    viewBox="0 0 {{ chartWidth }} {{ chartHeight }}"
+                    preserveAspectRatio="none"
+                    role="img"
+                    aria-label="Page views trend over the last {{ days }} days"
+                >
+                    <polyline
+                        class="analytics-chart__line"
+                        points="{{ points|join(' ') }}"
+                    />
+                </svg>
+            </div>
+        {% elseif dailyViews|length == 1 %}
+            <p class="light">
+                Not enough data to display a trend yet.
+            </p>
+        {% else %}
+            <p class="light">
+                No page view data available for this period.
+            </p>
+        {% endif %}
 
     </div>
 
