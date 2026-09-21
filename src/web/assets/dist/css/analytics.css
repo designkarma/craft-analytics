@@ -96,3 +96,22 @@
     stroke-width: 2;
     vector-effect: non-scaling-stroke;
 }
+
+.analytics-widget__error {
+    padding: 8px 0;
+}
+
+.analytics-widget__error h3 {
+    margin: 0 0 6px;
+}
+
+.analytics-widget__error p {
+    margin: 0;
+}
+
+.analytics-widget__error-detail {
+    color: var(--gray-500);
+    font-size: 12px;
+    margin-top: 10px !important;
+    word-break: break-word;
+}

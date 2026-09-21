@@ -32,25 +32,40 @@ class AnalyticsWidget extends Widget
     }
 
     public function getBodyHtml(): ?string
-    {
-        Craft::$app->getView()->registerAssetBundle(AnalyticsAsset::class);
+	{
+	    Craft::$app->getView()->registerAssetBundle(AnalyticsAsset::class);
 
-        $analytics = new Analytics();
+	    try {
+	        $analytics = new Analytics();
+	        $overview = $analytics->getOverview($this->days);
 
-        $overview = $analytics->getOverview($this->days);
+	        return Craft::$app->getView()->renderTemplate(
+	            'analytics/widgets/analytics',
+	            [
+	                'days' => $this->days,
+	                'users' => $overview['users'],
+	                'sessions' => $overview['sessions'],
+	                'pageViews' => $overview['pageViews'],
+	                'changes' => $overview['changes'],
+	                'dailyViews' => $analytics->getDailyViews($this->days),
+	                'topPages' => $analytics->getTopPages($this->days),
+	                'trafficSources' => $analytics->getTrafficSources($this->days),
+	            ]
+	        );
+	    } catch (\Throwable $e) {
+	        Craft::error(
+	            'Unable to load Google Analytics data: ' . $e->getMessage(),
+	            __METHOD__
+	        );
 
-        return Craft::$app->getView()->renderTemplate(
-            'analytics/widgets/analytics',
-            [
-                'days' => $this->days,
-                'users' => $overview['users'],
-                'sessions' => $overview['sessions'],
-                'pageViews' => $overview['pageViews'],
-                'changes' => $overview['changes'],
-                'dailyViews' => $analytics->getDailyViews($this->days),
-                'topPages' => $analytics->getTopPages($this->days),
-                'trafficSources' => $analytics->getTrafficSources($this->days),
-            ]
-        );
-    }
+	        return Craft::$app->getView()->renderTemplate(
+	            'analytics/widgets/error',
+	            [
+	                'message' => Craft::$app->getConfig()->getGeneral()->devMode
+	                    ? $e->getMessage()
+	                    : null,
+	            ]
+	        );
+	    }
+	}
 }

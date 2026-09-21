@@ -1,0 +1,14 @@
+<div class="analytics-widget__error">
+    <h3>Analytics unavailable</h3>
+
+    <p>
+        Google Analytics data could not be loaded.
+        Check the plugin settings or try again later.
+    </p>
+
+    {% if message %}
+        <p class="analytics-widget__error-detail">
+            {{ message }}
+        </p>
+    {% endif %}
+</div>
