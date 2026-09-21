@@ -3,7 +3,7 @@
 namespace designkarma\analytics\services;
 
 use Craft;
-use craft\helpers\App;
+use designkarma\analytics\Plugin;
 use Google\Analytics\Data\V1beta\Client\BetaAnalyticsDataClient;
 use Google\Analytics\Data\V1beta\DateRange;
 use Google\Analytics\Data\V1beta\Dimension;
@@ -18,12 +18,40 @@ class Analytics extends Component
 
     private function getClient(): BetaAnalyticsDataClient
     {
-        return new BetaAnalyticsDataClient();
+        $settings = Plugin::getInstance()->getSettings();
+
+        $credentialsPath = Craft::parseEnv($settings->credentialsPath);
+
+        if (!$credentialsPath) {
+            throw new \RuntimeException(
+                'Google Analytics credentials path has not been configured.'
+            );
+        }
+
+        if (!file_exists($credentialsPath)) {
+            throw new \RuntimeException(
+                "Google Analytics credentials file could not be found: {$credentialsPath}"
+            );
+        }
+
+        return new BetaAnalyticsDataClient([
+            'credentials' => $credentialsPath,
+        ]);
     }
 
     private function getPropertyId(): string
     {
-        return App::env('GOOGLE_ANALYTICS_PROPERTY_ID') ?? '';
+        $settings = Plugin::getInstance()->getSettings();
+
+        $propertyId = Craft::parseEnv($settings->propertyId);
+
+        if (!$propertyId) {
+            throw new \RuntimeException(
+                'Google Analytics Property ID has not been configured.'
+            );
+        }
+
+        return $propertyId;
     }
 
     private function remember(string $key, callable $callback): mixed

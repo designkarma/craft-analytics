@@ -1,0 +1,23 @@
+{% import "_includes/forms" as forms %}
+
+{{ forms.autosuggestField({
+    label: 'GA4 Property ID'|t('analytics'),
+    instructions: 'Enter your Google Analytics 4 Property ID, or use an environment variable.'|t('analytics'),
+    id: 'propertyId',
+    name: 'propertyId',
+    value: settings.propertyId,
+    suggestEnvVars: true,
+    required: true,
+    errors: settings.getErrors('propertyId'),
+}) }}
+
+{{ forms.autosuggestField({
+    label: 'Service account credentials path'|t('analytics'),
+    instructions: 'Enter the path to your Google service account JSON credentials file, or use an environment variable.'|t('analytics'),
+    id: 'credentialsPath',
+    name: 'credentialsPath',
+    value: settings.credentialsPath,
+    suggestEnvVars: true,
+    required: true,
+    errors: settings.getErrors('credentialsPath'),
+}) }}

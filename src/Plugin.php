@@ -3,14 +3,18 @@
 namespace designkarma\analytics;
 
 use Craft;
+use craft\base\Model;
 use craft\base\Plugin as BasePlugin;
 use craft\events\RegisterComponentTypesEvent;
 use craft\services\Dashboard;
+use designkarma\analytics\models\Settings;
 use designkarma\analytics\widgets\AnalyticsWidget;
 use yii\base\Event;
 
 class Plugin extends BasePlugin
 {
+    public bool $hasCpSettings = true;
+
     public function init(): void
     {
         parent::init();
@@ -26,6 +30,21 @@ class Plugin extends BasePlugin
         Craft::info(
             'Analytics plugin loaded',
             __METHOD__
+        );
+    }
+
+    protected function createSettingsModel(): ?Model
+    {
+        return new Settings();
+    }
+
+    protected function settingsHtml(): ?string
+    {
+        return Craft::$app->getView()->renderTemplate(
+            'analytics/settings',
+            [
+                'settings' => $this->getSettings(),
+            ]
         );
     }
 }
