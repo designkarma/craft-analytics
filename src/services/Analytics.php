@@ -16,8 +16,14 @@ class Analytics extends Component
 {
     private const CACHE_DURATION = 3600;
 
+    private ?BetaAnalyticsDataClient $client = null;
+
     private function getClient(): BetaAnalyticsDataClient
     {
+        if ($this->client !== null) {
+            return $this->client;
+        }
+
         $settings = Plugin::getInstance()->getSettings();
 
         $credentialsPath = Craft::parseEnv($settings->credentialsPath);
@@ -34,9 +40,11 @@ class Analytics extends Component
             );
         }
 
-        return new BetaAnalyticsDataClient([
+        $this->client = new BetaAnalyticsDataClient([
             'credentials' => $credentialsPath,
         ]);
+
+        return $this->client;
     }
 
     private function getPropertyId(): string

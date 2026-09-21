@@ -1,94 +1,62 @@
 <div class="analytics-widget">
 
     <div class="analytics-widget__header">
-        <strong>Performance</strong>
-        <span class="analytics-widget__period">
+        <h2>Performance</h2>
+
+        <div class="analytics-widget__period">
             Last {{ days }} days
-        </span>
+        </div>
     </div>
 
     <div class="analytics-metrics">
 
-        <div class="analytics-metric">
-            <div class="analytics-metric__label">Users</div>
-            <div class="analytics-metric__value">
-                {{ users|number_format }}
-            </div>
-            <div class="analytics-metric__change analytics-metric__change--up">
-                {% set change = changes.users %}
-				{% if change is null %}
-				    <div class="analytics-metric__change">
-				        No previous data
-				    </div>
-				{% elseif change > 0 %}
-				    <div class="analytics-metric__change analytics-metric__change--up">
-				        ↑ {{ change|abs|number_format(1) }}%
-				    </div>
-				{% elseif change < 0 %}
-				    <div class="analytics-metric__change analytics-metric__change--down">
-				        ↓ {{ change|abs|number_format(1) }}%
-				    </div>
-				{% else %}
-				    <div class="analytics-metric__change">
-				        – 0.0%
-				    </div>
-				{% endif %}
-            </div>
-        </div>
+        {% set metrics = [
+            {
+                label: 'Users',
+                value: users,
+                change: changes.users
+            },
+            {
+                label: 'Sessions',
+                value: sessions,
+                change: changes.sessions
+            },
+            {
+                label: 'Page views',
+                value: pageViews,
+                change: changes.pageViews
+            }
+        ] %}
 
-        <div class="analytics-metric">
-            <div class="analytics-metric__label">Sessions</div>
-            <div class="analytics-metric__value">
-                {{ sessions|number_format }}
-            </div>
-            <div class="analytics-metric__change analytics-metric__change--up">
-                {% set change = changes.sessions %}
-                {% if change is null %}
-				    <div class="analytics-metric__change">
-				        No previous data
-				    </div>
-				{% elseif change > 0 %}
-				    <div class="analytics-metric__change analytics-metric__change--up">
-				        ↑ {{ change|abs|number_format(1) }}%
-				    </div>
-				{% elseif change < 0 %}
-				    <div class="analytics-metric__change analytics-metric__change--down">
-				        ↓ {{ change|abs|number_format(1) }}%
-				    </div>
-				{% else %}
-				    <div class="analytics-metric__change">
-				        – 0.0%
-				    </div>
-				{% endif %}
-            </div>
-        </div>
+        {% for metric in metrics %}
+            <div class="analytics-metric">
+                <div class="analytics-metric__label">
+                    {{ metric.label }}
+                </div>
 
-        <div class="analytics-metric">
-            <div class="analytics-metric__label">Page views</div>
-            <div class="analytics-metric__value">
-                {{ pageViews|number_format }}
+                <div class="analytics-metric__value">
+                    {{ metric.value|number_format }}
+                </div>
+
+                {% if metric.change is null %}
+                    <div class="analytics-metric__change">
+                        No previous data
+                    </div>
+                {% elseif metric.change > 0 %}
+                    <div class="analytics-metric__change analytics-metric__change--up">
+                        ↑ {{ metric.change|abs|number_format(1) }}%
+                    </div>
+                {% elseif metric.change < 0 %}
+                    <div class="analytics-metric__change analytics-metric__change--down">
+                        ↓ {{ metric.change|abs|number_format(1) }}%
+                    </div>
+                {% else %}
+                    <div class="analytics-metric__change">
+                        – 0.0%
+                    </div>
+                {% endif %}
             </div>
-            <div class="analytics-metric__change analytics-metric__change--down">
-                {% set change = changes.pageViews %}
-                {% if change is null %}
-				    <div class="analytics-metric__change">
-				        No previous data
-				    </div>
-				{% elseif change > 0 %}
-				    <div class="analytics-metric__change analytics-metric__change--up">
-				        ↑ {{ change|abs|number_format(1) }}%
-				    </div>
-				{% elseif change < 0 %}
-				    <div class="analytics-metric__change analytics-metric__change--down">
-				        ↓ {{ change|abs|number_format(1) }}%
-				    </div>
-				{% else %}
-				    <div class="analytics-metric__change">
-				        – 0.0%
-				    </div>
-				{% endif %}
-            </div>
-        </div>
+        {% endfor %}
 
     </div>
 
@@ -96,15 +64,16 @@
 
         <div class="analytics-widget__chart-header">
             <h3 class="analytics-widget__section-title">
-                Page views
+                Page Views
             </h3>
 
-            <span class="analytics-widget__chart-total">
-                {{ pageViews|number_format }} total
-            </span>
+            <div class="analytics-widget__chart-total">
+                Last {{ days }} days
+            </div>
         </div>
 
         {% if dailyViews|length > 1 %}
+
             {% set chartWidth = 600 %}
             {% set chartHeight = 140 %}
             {% set chartPadding = 4 %}
@@ -141,14 +110,19 @@
                     />
                 </svg>
             </div>
+
         {% elseif dailyViews|length == 1 %}
+
             <p class="light">
                 Not enough data to display a trend yet.
             </p>
+
         {% else %}
+
             <p class="light">
                 No page view data available for this period.
             </p>
+
         {% endif %}
 
     </div>
@@ -156,30 +130,36 @@
     <div class="analytics-widget__section">
 
         <h3 class="analytics-widget__section-title">
-            Top pages
+            Top Pages
         </h3>
 
-        <table class="data fullwidth analytics-widget__table">
-            <thead>
-                <tr>
-                    <th>Page</th>
-                    <th>Views</th>
-                </tr>
-            </thead>
-
-            <tbody>
-                {% for page in topPages %}
+        {% if topPages %}
+            <table class="data fullwidth analytics-widget__table">
+                <thead>
                     <tr>
-                        <td>{{ page.title }}</td>
-                        <td>{{ page.views|number_format }}</td>
+                        <th>Page</th>
+                        <th>Views</th>
                     </tr>
-                {% endfor %}
-            </tbody>
-        </table>
+                </thead>
+                <tbody>
+                    {% for page in topPages %}
+                        <tr>
+                            <td>{{ page.title }}</td>
+                            <td>{{ page.views|number_format }}</td>
+                        </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        {% else %}
+            <p class="light">
+                No page data available for this period.
+            </p>
+        {% endif %}
 
     </div>
 
     <div class="analytics-widget__section">
+
         <h3 class="analytics-widget__section-title">
             Traffic Sources
         </h3>
@@ -202,8 +182,11 @@
                 </tbody>
             </table>
         {% else %}
-            <p class="light">No traffic source data available.</p>
+            <p class="light">
+                No traffic source data available for this period.
+            </p>
         {% endif %}
+
     </div>
 
 </div>

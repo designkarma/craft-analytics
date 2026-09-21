@@ -1,8 +1,16 @@
 {
     "name": "designkarma/craft-analytics",
-    "description": "Google Analytics dashboard integration for Craft CMS.",
+    "description": "A Google Analytics dashboard widget for Craft CMS.",
     "type": "craft-plugin",
+    "license": "proprietary",
+    "authors": [
+        {
+            "name": "DesignKarma",
+            "homepage": "https://designkarma.co.uk"
+        }
+    ],
     "require": {
+        "php": ">=8.2",
         "craftcms/cms": "^5.0",
         "google/analytics-data": "^0.26.1"
     },
@@ -14,6 +22,8 @@
     "extra": {
         "name": "Analytics",
         "handle": "analytics",
-        "class": "designkarma\\analytics\\Plugin"
+        "class": "designkarma\\analytics\\Plugin",
+        "developer": "DesignKarma",
+        "developerUrl": "https://designkarma.co.uk"
     }
 }
