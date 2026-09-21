@@ -242,4 +242,49 @@ class Analytics extends Component
             return $pages;
         });
     }
+
+    public function getTrafficSources(int $days = 30): array
+    {
+        return $this->remember("traffic-sources:{$days}days", function() use ($days) {
+            $client = $this->getClient();
+
+            $response = $client->runReport(
+                new RunReportRequest([
+                    'property' => 'properties/' . $this->getPropertyId(),
+                    'date_ranges' => [
+                        new DateRange([
+                            'start_date' => "{$days}daysAgo",
+                            'end_date' => 'yesterday',
+                        ]),
+                    ],
+                    'dimensions' => [
+                        new Dimension(['name' => 'sessionSource']),
+                    ],
+                    'metrics' => [
+                        new Metric(['name' => 'sessions']),
+                    ],
+                    'order_bys' => [
+                        new OrderBy([
+                            'metric' => new OrderBy\MetricOrderBy([
+                                'metric_name' => 'sessions',
+                            ]),
+                            'desc' => true,
+                        ]),
+                    ],
+                    'limit' => 5,
+                ])
+            );
+
+            $sources = [];
+
+            foreach ($response->getRows() as $row) {
+                $sources[] = [
+                    'source' => $row->getDimensionValues()[0]->getValue(),
+                    'sessions' => (int) $row->getMetricValues()[0]->getValue(),
+                ];
+            }
+
+            return $sources;
+        });
+    }
 }

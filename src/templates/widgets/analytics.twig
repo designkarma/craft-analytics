@@ -169,4 +169,31 @@
 
     </div>
 
+    <div class="analytics-widget__section">
+        <h3 class="analytics-widget__section-title">
+            Traffic Sources
+        </h3>
+
+        {% if trafficSources %}
+            <table class="data fullwidth analytics-widget__table">
+                <thead>
+                    <tr>
+                        <th>Source</th>
+                        <th>Sessions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for source in trafficSources %}
+                        <tr>
+                            <td>{{ source.source }}</td>
+                            <td>{{ source.sessions|number_format }}</td>
+                        </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        {% else %}
+            <p class="light">No traffic source data available.</p>
+        {% endif %}
+    </div>
+
 </div>

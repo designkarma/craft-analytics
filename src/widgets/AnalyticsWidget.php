@@ -49,6 +49,7 @@ class AnalyticsWidget extends Widget
                 'changes' => $overview['changes'],
                 'dailyViews' => $analytics->getDailyViews($this->days),
                 'topPages' => $analytics->getTopPages($this->days),
+                'trafficSources' => $analytics->getTrafficSources($this->days),
             ]
         );
     }
