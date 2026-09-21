@@ -1,0 +1,119 @@
+<div class="analytics-widget">
+
+    <div class="analytics-widget__header">
+        <strong>Performance</strong>
+        <span class="analytics-widget__period">Last 30 days</span>
+    </div>
+
+    <div class="analytics-metrics">
+
+        <div class="analytics-metric">
+            <div class="analytics-metric__label">Users</div>
+            <div class="analytics-metric__value">
+                {{ users|number_format }}
+            </div>
+            <div class="analytics-metric__change analytics-metric__change--up">
+                ↑ 12.4%
+            </div>
+        </div>
+
+        <div class="analytics-metric">
+            <div class="analytics-metric__label">Sessions</div>
+            <div class="analytics-metric__value">
+                {{ sessions|number_format }}
+            </div>
+            <div class="analytics-metric__change analytics-metric__change--up">
+                ↑ 8.7%
+            </div>
+        </div>
+
+        <div class="analytics-metric">
+            <div class="analytics-metric__label">Page views</div>
+            <div class="analytics-metric__value">
+                {{ pageViews|number_format }}
+            </div>
+            <div class="analytics-metric__change analytics-metric__change--down">
+                ↓ 2.1%
+            </div>
+        </div>
+
+    </div>
+
+    <div class="analytics-widget__section">
+
+        <div class="analytics-widget__chart-header">
+            <h3 class="analytics-widget__section-title">
+                Page views
+            </h3>
+
+            <span class="analytics-widget__chart-total">
+                {{ pageViews|number_format }} total
+            </span>
+        </div>
+
+        {% set chartWidth = 600 %}
+        {% set chartHeight = 140 %}
+        {% set chartPadding = 4 %}
+        {% set maxValue = max(dailyViews) %}
+        {% set minValue = min(dailyViews) %}
+        {% set range = maxValue - minValue %}
+
+        {% set points = [] %}
+
+        {% for value in dailyViews %}
+            {% set x = loop.index0 / (dailyViews|length - 1) * chartWidth %}
+
+            {% set y = chartPadding + (
+                chartHeight - (chartPadding * 2)
+            ) * (
+                1 - ((value - minValue) / range)
+            ) %}
+
+            {% set points = points|merge([
+                x ~ ',' ~ y
+            ]) %}
+        {% endfor %}
+
+        <div class="analytics-chart">
+            <svg
+                viewBox="0 0 {{ chartWidth }} {{ chartHeight }}"
+                preserveAspectRatio="none"
+                role="img"
+                aria-label="Page views over the last 30 days"
+            >
+                <polyline
+                    class="analytics-chart__line"
+                    points="{{ points|join(' ') }}"
+                />
+            </svg>
+        </div>
+
+    </div>
+
+    <div class="analytics-widget__section">
+
+        <h3 class="analytics-widget__section-title">
+            Top pages
+        </h3>
+
+        <table class="data fullwidth analytics-widget__table">
+            <thead>
+                <tr>
+                    <th>Page</th>
+                    <th>Views</th>
+                </tr>
+            </thead>
+
+            <tbody>
+                {% for page in topPages %}
+                    <tr>
+                        <td>{{ page.title }}</td>
+                        <td>{{ page.views|number_format }}</td>
+                    </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+
+    </div>
+
+</div>
