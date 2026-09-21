@@ -3,7 +3,8 @@
     "description": "Google Analytics dashboard integration for Craft CMS.",
     "type": "craft-plugin",
     "require": {
-        "craftcms/cms": "^5.0"
+        "craftcms/cms": "^5.0",
+        "google/analytics-data": "^0.26.1"
     },
     "autoload": {
         "psr-4": {
