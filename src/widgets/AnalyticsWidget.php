@@ -31,10 +31,11 @@ class AnalyticsWidget extends Widget
 	        'analytics/widgets/analytics',
 	        [
 	            'users' => $overview['users'],
-	            'sessions' => $overview['sessions'],
-	            'pageViews' => $overview['pageViews'],
-	            'dailyViews' => $analytics->getDailyViews(),
-	            'topPages' => $analytics->getTopPages(),
+		        'sessions' => $overview['sessions'],
+		        'pageViews' => $overview['pageViews'],
+		        'changes' => $overview['changes'],
+		        'dailyViews' => $analytics->getDailyViews(),
+		        'topPages' => $analytics->getTopPages(),
 	        ]
 	    );
 	}

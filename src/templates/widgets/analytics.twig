@@ -13,7 +13,24 @@
                 {{ users|number_format }}
             </div>
             <div class="analytics-metric__change analytics-metric__change--up">
-                ↑ 12.4%
+                {% set change = changes.users %}
+				{% if change is null %}
+				    <div class="analytics-metric__change">
+				        No previous data
+				    </div>
+				{% elseif change > 0 %}
+				    <div class="analytics-metric__change analytics-metric__change--up">
+				        ↑ {{ change|abs|number_format(1) }}%
+				    </div>
+				{% elseif change < 0 %}
+				    <div class="analytics-metric__change analytics-metric__change--down">
+				        ↓ {{ change|abs|number_format(1) }}%
+				    </div>
+				{% else %}
+				    <div class="analytics-metric__change">
+				        – 0.0%
+				    </div>
+				{% endif %}
             </div>
         </div>
 
@@ -23,7 +40,24 @@
                 {{ sessions|number_format }}
             </div>
             <div class="analytics-metric__change analytics-metric__change--up">
-                ↑ 8.7%
+                {% set change = changes.sessions %}
+                {% if change is null %}
+				    <div class="analytics-metric__change">
+				        No previous data
+				    </div>
+				{% elseif change > 0 %}
+				    <div class="analytics-metric__change analytics-metric__change--up">
+				        ↑ {{ change|abs|number_format(1) }}%
+				    </div>
+				{% elseif change < 0 %}
+				    <div class="analytics-metric__change analytics-metric__change--down">
+				        ↓ {{ change|abs|number_format(1) }}%
+				    </div>
+				{% else %}
+				    <div class="analytics-metric__change">
+				        – 0.0%
+				    </div>
+				{% endif %}
             </div>
         </div>
 
@@ -33,7 +67,24 @@
                 {{ pageViews|number_format }}
             </div>
             <div class="analytics-metric__change analytics-metric__change--down">
-                ↓ 2.1%
+                {% set change = changes.pageViews %}
+                {% if change is null %}
+				    <div class="analytics-metric__change">
+				        No previous data
+				    </div>
+				{% elseif change > 0 %}
+				    <div class="analytics-metric__change analytics-metric__change--up">
+				        ↑ {{ change|abs|number_format(1) }}%
+				    </div>
+				{% elseif change < 0 %}
+				    <div class="analytics-metric__change analytics-metric__change--down">
+				        ↓ {{ change|abs|number_format(1) }}%
+				    </div>
+				{% else %}
+				    <div class="analytics-metric__change">
+				        – 0.0%
+				    </div>
+				{% endif %}
             </div>
         </div>
 
