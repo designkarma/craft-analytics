@@ -75,23 +75,27 @@ class Analytics extends Component
         );
     }
 
-    public function getOverview(): array
+    public function getOverview(int $days = 30): array
     {
-        return $this->remember('overview-comparison:30days', function() {
+        return $this->remember("overview-comparison:{$days}days", function() use ($days) {
             $client = $this->getClient();
+
+            $currentStart = "{$days}daysAgo";
+            $previousStart = ($days * 2) . "daysAgo";
+            $previousEnd = ($days + 1) . "daysAgo";
 
             $response = $client->runReport(
                 new RunReportRequest([
                     'property' => 'properties/' . $this->getPropertyId(),
                     'date_ranges' => [
                         new DateRange([
-                            'start_date' => '30daysAgo',
+                            'start_date' => $currentStart,
                             'end_date' => 'yesterday',
                             'name' => 'current',
                         ]),
                         new DateRange([
-                            'start_date' => '60daysAgo',
-                            'end_date' => '31daysAgo',
+                            'start_date' => $previousStart,
+                            'end_date' => $previousEnd,
                             'name' => 'previous',
                         ]),
                     ],
@@ -102,8 +106,6 @@ class Analytics extends Component
                     ],
                 ])
             );
-
-            $rows = $response->getRows();
 
             $current = [
                 'users' => 0,
@@ -117,9 +119,8 @@ class Analytics extends Component
                 'pageViews' => 0,
             ];
 
-            foreach ($rows as $row) {
+            foreach ($response->getRows() as $row) {
                 $values = $row->getMetricValues();
-
                 $rangeName = $row->getDimensionValues()[0]->getValue();
 
                 $data = [
@@ -139,7 +140,6 @@ class Analytics extends Component
                 'users' => $current['users'],
                 'sessions' => $current['sessions'],
                 'pageViews' => $current['pageViews'],
-
                 'changes' => [
                     'users' => $this->calculateChange(
                         $current['users'],
@@ -158,9 +158,9 @@ class Analytics extends Component
         });
     }
 
-    public function getDailyViews(): array
+    public function getDailyViews(int $days = 30): array
     {
-        return $this->remember('daily-views:30days', function() {
+        return $this->remember("daily-views:{$days}days", function() use ($days) {
             $client = $this->getClient();
 
             $response = $client->runReport(
@@ -168,19 +168,15 @@ class Analytics extends Component
                     'property' => 'properties/' . $this->getPropertyId(),
                     'date_ranges' => [
                         new DateRange([
-                            'start_date' => '30daysAgo',
+                            'start_date' => "{$days}daysAgo",
                             'end_date' => 'yesterday',
                         ]),
                     ],
                     'dimensions' => [
-                        new Dimension([
-                            'name' => 'date',
-                        ]),
+                        new Dimension(['name' => 'date']),
                     ],
                     'metrics' => [
-                        new Metric([
-                            'name' => 'screenPageViews',
-                        ]),
+                        new Metric(['name' => 'screenPageViews']),
                     ],
                     'order_bys' => [
                         new OrderBy([
@@ -202,9 +198,9 @@ class Analytics extends Component
         });
     }
 
-    public function getTopPages(): array
+    public function getTopPages(int $days = 30): array
     {
-        return $this->remember('top-pages:30days', function() {
+        return $this->remember("top-pages:{$days}days", function() use ($days) {
             $client = $this->getClient();
 
             $response = $client->runReport(
@@ -212,19 +208,15 @@ class Analytics extends Component
                     'property' => 'properties/' . $this->getPropertyId(),
                     'date_ranges' => [
                         new DateRange([
-                            'start_date' => '30daysAgo',
+                            'start_date' => "{$days}daysAgo",
                             'end_date' => 'yesterday',
                         ]),
                     ],
                     'dimensions' => [
-                        new Dimension([
-                            'name' => 'pageTitle',
-                        ]),
+                        new Dimension(['name' => 'pageTitle']),
                     ],
                     'metrics' => [
-                        new Metric([
-                            'name' => 'screenPageViews',
-                        ]),
+                        new Metric(['name' => 'screenPageViews']),
                     ],
                     'order_bys' => [
                         new OrderBy([

@@ -1,0 +1,14 @@
+{% import "_includes/forms" as forms %}
+
+{{ forms.selectField({
+    label: 'Date range'|t('analytics'),
+    instructions: 'Choose the reporting period for this widget.'|t('analytics'),
+    id: 'days',
+    name: 'days',
+    value: widget.days,
+    options: [
+        { label: 'Last 7 days', value: 7 },
+        { label: 'Last 30 days', value: 30 },
+        { label: 'Last 90 days', value: 90 },
+    ],
+}) }}
