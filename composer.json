@@ -1,0 +1,18 @@
+{
+    "name": "designkarma/craft-analytics",
+    "description": "Google Analytics dashboard integration for Craft CMS.",
+    "type": "craft-plugin",
+    "require": {
+        "craftcms/cms": "^5.0"
+    },
+    "autoload": {
+        "psr-4": {
+            "designkarma\\analytics\\": "src/"
+        }
+    },
+    "extra": {
+        "name": "Analytics",
+        "handle": "analytics",
+        "class": "designkarma\\analytics\\Plugin"
+    }
+}
