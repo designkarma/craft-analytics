@@ -64,6 +64,7 @@ class AnalyticsWidget extends Widget
                 'analytics/widgets/analytics',
                 [
                     'days' => $days,
+                    'propertyId' => $analytics->getPropertyId(),
                     'users' => $overview['users'],
                     'sessions' => $overview['sessions'],
                     'pageViews' => $overview['pageViews'],

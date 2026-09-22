@@ -93,7 +93,7 @@
 }
 
 .analytics-chart__grid {
-    stroke: var(--gray-200);
+    stroke: var(--gray-100);
     stroke-width: 1;
     vector-effect: non-scaling-stroke;
 }
@@ -202,4 +202,16 @@
     font-size: 12px;
     margin-top: 10px !important;
     word-break: break-word;
+}
+
+.analytics-widget__footer {
+    border-top: 1px solid var(--gray-200);
+    margin-top: 24px;
+    padding-top: 16px;
+    text-align: right;
+}
+
+.analytics-widget__footer a {
+    font-size: 12px;
+    font-weight: 600;
 }

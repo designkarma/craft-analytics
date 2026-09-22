@@ -47,7 +47,7 @@ class Analytics extends Component
         return $this->client;
     }
 
-    private function getPropertyId(): string
+    public function getPropertyId(): string
     {
         $settings = Plugin::getInstance()->getSettings();
 
