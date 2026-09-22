@@ -1,31 +1,84 @@
-document.addEventListener('DOMContentLoaded', () => {
-    document.querySelectorAll('.analytics-chart').forEach((chart) => {
-        const tooltip = chart.querySelector('[data-analytics-chart-tooltip]');
-        const label = chart.querySelector('[data-analytics-chart-tooltip-label]');
-        const value = chart.querySelector('[data-analytics-chart-tooltip-value]');
+const getChartPoint = (target) => {
+    return target.closest('[data-analytics-chart-point]');
+};
 
-        if (!tooltip || !label || !value) {
-            return;
-        }
+const showTooltip = (point) => {
+    const chart = point.closest('.analytics-chart');
 
-        chart.querySelectorAll('[data-analytics-chart-point]').forEach((point) => {
-            const showTooltip = () => {
-                label.textContent = point.dataset.label;
-                value.textContent = `${Number(point.dataset.views).toLocaleString()} page views`;
+    if (!chart) {
+        return;
+    }
 
-                tooltip.style.left = point.style.left;
-                tooltip.style.top = point.style.top;
-                tooltip.hidden = false;
-            };
+    const tooltip = chart.querySelector(
+        '[data-analytics-chart-tooltip]'
+    );
 
-            const hideTooltip = () => {
-                tooltip.hidden = true;
-            };
+    const label = chart.querySelector(
+        '[data-analytics-chart-tooltip-label]'
+    );
 
-            point.addEventListener('mouseenter', showTooltip);
-            point.addEventListener('mouseleave', hideTooltip);
-            point.addEventListener('focus', showTooltip);
-            point.addEventListener('blur', hideTooltip);
-        });
-    });
+    const value = chart.querySelector(
+        '[data-analytics-chart-tooltip-value]'
+    );
+
+    if (!tooltip || !label || !value) {
+        return;
+    }
+
+    label.textContent = point.dataset.label;
+
+    value.textContent =
+        `${Number(point.dataset.views).toLocaleString()} page views`;
+
+    tooltip.style.left = point.style.left;
+    tooltip.style.top = point.style.top;
+    tooltip.hidden = false;
+};
+
+const hideTooltip = (point) => {
+    const chart = point.closest('.analytics-chart');
+
+    if (!chart) {
+        return;
+    }
+
+    const tooltip = chart.querySelector(
+        '[data-analytics-chart-tooltip]'
+    );
+
+    if (tooltip) {
+        tooltip.hidden = true;
+    }
+};
+
+document.addEventListener('mouseover', (event) => {
+    const point = getChartPoint(event.target);
+
+    if (point) {
+        showTooltip(point);
+    }
+});
+
+document.addEventListener('mouseout', (event) => {
+    const point = getChartPoint(event.target);
+
+    if (point) {
+        hideTooltip(point);
+    }
+});
+
+document.addEventListener('focusin', (event) => {
+    const point = getChartPoint(event.target);
+
+    if (point) {
+        showTooltip(point);
+    }
+});
+
+document.addEventListener('focusout', (event) => {
+    const point = getChartPoint(event.target);
+
+    if (point) {
+        hideTooltip(point);
+    }
 });
