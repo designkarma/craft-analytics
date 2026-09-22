@@ -8,6 +8,7 @@ use craft\base\Plugin as BasePlugin;
 use craft\events\RegisterComponentTypesEvent;
 use craft\services\Dashboard;
 use designkarma\analytics\models\Settings;
+use designkarma\analytics\services\Analytics;
 use designkarma\analytics\widgets\AnalyticsWidget;
 use yii\base\Event;
 
@@ -40,10 +41,13 @@ class Plugin extends BasePlugin
 
     protected function settingsHtml(): ?string
     {
+        $analytics = new Analytics();
+
         return Craft::$app->getView()->renderTemplate(
             'analytics/settings',
             [
                 'settings' => $this->getSettings(),
+                'configuration' => $analytics->getConfigurationStatus(),
             ]
         );
     }

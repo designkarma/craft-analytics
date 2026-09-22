@@ -1,23 +1,93 @@
 {% import "_includes/forms" as forms %}
 
-{{ forms.autosuggestField({
-    label: 'GA4 Property ID'|t('analytics'),
-    instructions: 'Enter your Google Analytics 4 Property ID, or use an environment variable.'|t('analytics'),
-    id: 'propertyId',
-    name: 'propertyId',
-    value: settings.propertyId,
-    suggestEnvVars: true,
-    required: true,
-    errors: settings.getErrors('propertyId'),
-}) }}
+<div class="analytics-settings">
 
-{{ forms.autosuggestField({
-    label: 'Service account credentials path'|t('analytics'),
-    instructions: 'Enter the path to your Google service account JSON credentials file, or use an environment variable.'|t('analytics'),
-    id: 'credentialsPath',
-    name: 'credentialsPath',
-    value: settings.credentialsPath,
-    suggestEnvVars: true,
-    required: true,
-    errors: settings.getErrors('credentialsPath'),
-}) }}
+    <p>
+        Connect Analytics to a Google Analytics 4 property using a
+        Google service account.
+    </p>
+
+    {{ forms.autosuggestField({
+        label: 'GA4 Property ID'|t('analytics'),
+        instructions: 'Your numeric Google Analytics 4 Property ID. Environment variables are recommended.'|t('analytics'),
+        id: 'propertyId',
+        name: 'propertyId',
+        value: settings.propertyId,
+        suggestEnvVars: true,
+        required: true,
+        errors: settings.getErrors('propertyId'),
+    }) }}
+
+    {{ forms.autosuggestField({
+        label: 'Service account credentials path'|t('analytics'),
+        instructions: 'The absolute path to your Google service account JSON credentials file. Store this outside the plugin directory and do not commit it to source control.'|t('analytics'),
+        id: 'credentialsPath',
+        name: 'credentialsPath',
+        value: settings.credentialsPath,
+        suggestEnvVars: true,
+        required: true,
+        errors: settings.getErrors('credentialsPath'),
+    }) }}
+
+    {% if configuration.configured %}
+        <div class="pane" style="margin-top: 24px;">
+            <h3 style="margin-top: 0;">
+                ✓ {{ 'Configuration detected'|t('analytics') }}
+            </h3>
+
+            <p style="margin-bottom: 0;">
+                {{ 'Property ID and service account credentials are configured.'|t('analytics') }}
+            </p>
+        </div>
+    {% else %}
+        <div class="pane" style="margin-top: 24px;">
+            <h3 style="margin-top: 0;">
+                ⚠ {{ 'Configuration incomplete'|t('analytics') }}
+            </h3>
+
+            <ul style="margin-bottom: 0;">
+                <li>
+                    {% if configuration.propertyConfigured %}
+                        ✓ {{ 'GA4 Property ID configured'|t('analytics') }}
+                    {% else %}
+                        ✕ {{ 'GA4 Property ID not configured'|t('analytics') }}
+                    {% endif %}
+                </li>
+
+                <li>
+                    {% if configuration.credentialsExist %}
+                        ✓ {{ 'Credentials file found'|t('analytics') }}
+                    {% elseif configuration.credentialsConfigured %}
+                        ✕ {{ 'Credentials file could not be found'|t('analytics') }}
+                    {% else %}
+                        ✕ {{ 'Credentials path not configured'|t('analytics') }}
+                    {% endif %}
+                </li>
+            </ul>
+        </div>
+    {% endif %}
+
+    <hr>
+
+    <div>
+        <h2>{{ 'Google Analytics setup'|t('analytics') }}</h2>
+
+        <p>
+            {{ 'To connect Analytics to GA4:'|t('analytics') }}
+        </p>
+
+        <ol>
+            <li>{{ 'Create or select a Google Cloud project.'|t('analytics') }}</li>
+            <li>{{ 'Enable the Google Analytics Data API.'|t('analytics') }}</li>
+            <li>{{ 'Create a service account and download its JSON credentials file.'|t('analytics') }}</li>
+            <li>{{ 'Add the service account email address to your GA4 property with Viewer access.'|t('analytics') }}</li>
+            <li>{{ 'Add the Property ID and credentials path above.'|t('analytics') }}</li>
+        </ol>
+
+        <p class="light">
+            {{ 'For security, credentials should be stored outside the plugin directory and referenced using an environment variable.'|t('analytics') }}
+        </p>
+
+    </div>
+
+</div>

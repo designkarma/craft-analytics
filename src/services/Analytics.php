@@ -62,6 +62,26 @@ class Analytics extends Component
         return $propertyId;
     }
 
+    public function getConfigurationStatus(): array
+    {
+        $settings = Plugin::getInstance()->getSettings();
+
+        $propertyId = Craft::parseEnv($settings->propertyId);
+        $credentialsPath = Craft::parseEnv($settings->credentialsPath);
+
+        $propertyConfigured = !empty($propertyId);
+        $credentialsConfigured = !empty($credentialsPath);
+        $credentialsExist = $credentialsConfigured
+            && file_exists($credentialsPath);
+
+        return [
+            'configured' => $propertyConfigured && $credentialsExist,
+            'propertyConfigured' => $propertyConfigured,
+            'credentialsConfigured' => $credentialsConfigured,
+            'credentialsExist' => $credentialsExist,
+        ];
+    }
+
     private function remember(string $key, callable $callback): mixed
     {
         return Craft::$app->getCache()->getOrSet(
