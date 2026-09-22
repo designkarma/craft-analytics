@@ -1,14 +1,26 @@
 {
     "name": "designkarma/craft-analytics",
-    "description": "A Google Analytics dashboard widget for Craft CMS.",
+    "description": "A simple Google Analytics 4 dashboard widget for Craft CMS.",
     "type": "craft-plugin",
-    "license": "proprietary",
+    "keywords": [
+        "craft",
+        "craftcms",
+        "analytics",
+        "google analytics",
+        "ga4"
+    ],
+    "license": "MIT",
     "authors": [
         {
             "name": "DesignKarma",
             "homepage": "https://designkarma.co.uk"
         }
     ],
+    "support": {
+        "issues": "https://github.com/designkarma/craft-analytics/issues",
+        "source": "https://github.com/designkarma/craft-analytics",
+        "docs": "https://github.com/designkarma/craft-analytics/blob/main/README.md"
+    },
     "require": {
         "php": ">=8.2",
         "craftcms/cms": "^5.0",
