@@ -201,32 +201,29 @@ class Analytics extends Component
             "daily-views:{$days}days",
             function() use ($days) {
                 $client = $this->getClient();
+                $propertyId = $this->getPropertyId();
                 $ranges = $this->getDateRanges($days);
 
-                $response = $client->runReport(
-                    new RunReportRequest([
-                        'property' => 'properties/' . $this->getPropertyId(),
-                        'date_ranges' => [
-                            new DateRange([
-                                'start_date' => $ranges['currentStart'],
-                                'end_date' => $ranges['currentEnd'],
-                            ]),
-                        ],
-                        'dimensions' => [
-                            new Dimension(['name' => 'date']),
-                        ],
-                        'metrics' => [
-                            new Metric(['name' => 'screenPageViews']),
-                        ],
-                        'order_bys' => [
-                            new OrderBy([
-                                'dimension' => new OrderBy\DimensionOrderBy([
-                                    'dimension_name' => 'date',
-                                ]),
-                            ]),
-                        ],
+                $request = (new RunReportRequest())
+                    ->setProperty("properties/{$propertyId}")
+                    ->setDateRanges([
+                        new DateRange([
+                            'start_date' => $ranges['currentStart'],
+                            'end_date' => $ranges['currentEnd'],
+                        ]),
                     ])
-                );
+                    ->setDimensions([
+                        new Dimension([
+                            'name' => 'date',
+                        ]),
+                    ])
+                    ->setMetrics([
+                        new Metric([
+                            'name' => 'screenPageViews',
+                        ]),
+                    ]);
+
+                $response = $client->runReport($request);
 
                 $viewsByDate = [];
 
@@ -235,12 +232,12 @@ class Analytics extends Component
                         ->getDimensionValues()[0]
                         ->getValue();
 
-                    $viewsByDate[$date] = (int) $row
+                    $views = (int)$row
                         ->getMetricValues()[0]
                         ->getValue();
-                }
 
-                $views = [];
+                    $viewsByDate[$date] = $views;
+                }
 
                 $timezone = new \DateTimeZone(
                     Craft::$app->getTimeZone()
@@ -255,6 +252,8 @@ class Analytics extends Component
                     '-' . ($days - 1) . ' days'
                 );
 
+                $dailyViews = [];
+
                 for (
                     $date = $start;
                     $date <= $end;
@@ -262,10 +261,14 @@ class Analytics extends Component
                 ) {
                     $key = $date->format('Ymd');
 
-                    $views[] = $viewsByDate[$key] ?? 0;
+                    $dailyViews[] = [
+                        'date' => $date->format('Y-m-d'),
+                        'label' => $date->format('j M'),
+                        'views' => $viewsByDate[$key] ?? 0,
+                    ];
                 }
 
-                return $views;
+                return $dailyViews;
             }
         );
     }
@@ -276,34 +279,41 @@ class Analytics extends Component
             "top-pages:{$days}days",
             function() use ($days) {
                 $client = $this->getClient();
+                $propertyId = $this->getPropertyId();
                 $ranges = $this->getDateRanges($days);
 
-                $response = $client->runReport(
-                    new RunReportRequest([
-                        'property' => 'properties/' . $this->getPropertyId(),
-                        'date_ranges' => [
-                            new DateRange([
-                                'start_date' => $ranges['currentStart'],
-                                'end_date' => $ranges['currentEnd'],
-                            ]),
-                        ],
-                        'dimensions' => [
-                            new Dimension(['name' => 'pageTitle']),
-                        ],
-                        'metrics' => [
-                            new Metric(['name' => 'screenPageViews']),
-                        ],
-                        'order_bys' => [
-                            new OrderBy([
-                                'metric' => new OrderBy\MetricOrderBy([
-                                    'metric_name' => 'screenPageViews',
-                                ]),
-                                'desc' => true,
-                            ]),
-                        ],
-                        'limit' => 5,
+                $request = (new RunReportRequest())
+                    ->setProperty("properties/{$propertyId}")
+                    ->setDateRanges([
+                        new DateRange([
+                            'start_date' => $ranges['currentStart'],
+                            'end_date' => $ranges['currentEnd'],
+                        ]),
                     ])
-                );
+                    ->setDimensions([
+                        new Dimension([
+                            'name' => 'pageTitle',
+                        ]),
+                        new Dimension([
+                            'name' => 'pagePath',
+                        ]),
+                    ])
+                    ->setMetrics([
+                        new Metric([
+                            'name' => 'screenPageViews',
+                        ]),
+                    ])
+                    ->setOrderBys([
+                        new OrderBy([
+                            'metric' => new OrderBy\MetricOrderBy([
+                                'metric_name' => 'screenPageViews',
+                            ]),
+                            'desc' => true,
+                        ]),
+                    ])
+                    ->setLimit(5);
+
+                $response = $client->runReport($request);
 
                 $pages = [];
 
@@ -312,7 +322,10 @@ class Analytics extends Component
                         'title' => $row
                             ->getDimensionValues()[0]
                             ->getValue(),
-                        'views' => (int) $row
+                        'path' => $row
+                            ->getDimensionValues()[1]
+                            ->getValue(),
+                        'views' => (int)$row
                             ->getMetricValues()[0]
                             ->getValue(),
                     ];

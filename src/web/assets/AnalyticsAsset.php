@@ -14,6 +14,10 @@ class AnalyticsAsset extends AssetBundle
             'css/analytics.css',
         ];
 
+        $this->js = [
+            'js/analytics.js',
+        ];
+
         parent::init();
     }
 }

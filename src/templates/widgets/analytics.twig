@@ -75,40 +75,153 @@
         {% if dailyViews|length > 1 %}
 
             {% set chartWidth = 600 %}
-            {% set chartHeight = 140 %}
-            {% set chartPadding = 4 %}
-            {% set maxViews = max(dailyViews) %}
-            {% set minViews = min(dailyViews) %}
+            {% set chartHeight = 160 %}
+            {% set plotTop = 10 %}
+            {% set plotBottom = 130 %}
+            {% set plotHeight = plotBottom - plotTop %}
+
+            {% set values = dailyViews|map(item => item.views) %}
+            {% set maxViews = max(values) %}
+            {% set minViews = min(values) %}
             {% set range = maxViews - minViews %}
             {% set points = [] %}
 
-            {% for views in dailyViews %}
-                {% set x = loop.index0 / (dailyViews|length - 1) * chartWidth %}
+            {% for item in dailyViews %}
+
+                {% set x =
+                    loop.index0
+                    / (dailyViews|length - 1)
+                    * chartWidth
+                %}
 
                 {% if range > 0 %}
-                    {% set y = chartPadding
-                        + ((maxViews - views) / range)
-                        * (chartHeight - (chartPadding * 2))
+                    {% set y =
+                        plotTop
+                        + ((maxViews - item.views) / range)
+                        * plotHeight
                     %}
                 {% else %}
-                    {% set y = chartHeight / 2 %}
+                    {% set y = plotTop + (plotHeight / 2) %}
                 {% endif %}
 
-                {% set points = points|merge([x ~ ',' ~ y]) %}
+                {% set points = points|merge([
+                    x ~ ',' ~ y
+                ]) %}
+
             {% endfor %}
 
             <div class="analytics-chart">
+
                 <svg
                     viewBox="0 0 {{ chartWidth }} {{ chartHeight }}"
                     preserveAspectRatio="none"
                     role="img"
                     aria-label="Page views trend over the last {{ days }} days"
                 >
+
+                    <defs>
+                        <linearGradient
+                            id="analytics-chart-gradient"
+                            x1="0"
+                            y1="0"
+                            x2="0"
+                            y2="1"
+                        >
+                            <stop
+                                offset="0%"
+                                stop-color="#3b82f6"
+                                stop-opacity="0.25"
+                            />
+                            <stop
+                                offset="100%"
+                                stop-color="#3b82f6"
+                                stop-opacity="0"
+                            />
+                        </linearGradient>
+                    </defs>
+
+                    {% for position in [0, 0.5, 1] %}
+                        {% set y = plotTop + (plotHeight * position) %}
+
+                        <line
+                            class="analytics-chart__grid"
+                            x1="0"
+                            y1="{{ y }}"
+                            x2="{{ chartWidth }}"
+                            y2="{{ y }}"
+                        />
+                    {% endfor %}
+
+                    <polygon
+                        class="analytics-chart__area"
+                        points="
+                            0,{{ plotBottom }}
+                            {{ points|join(' ') }}
+                            {{ chartWidth }},{{ plotBottom }}
+                        "
+                    />
+
                     <polyline
                         class="analytics-chart__line"
                         points="{{ points|join(' ') }}"
                     />
                 </svg>
+
+                <div class="analytics-chart__markers">
+                    {% for item in dailyViews %}
+
+                        {% set xPercent =
+                            loop.index0
+                            / (dailyViews|length - 1)
+                            * 100
+                        %}
+
+                        {% if range > 0 %}
+                            {% set y =
+                                plotTop
+                                + ((maxViews - item.views) / range)
+                                * plotHeight
+                            %}
+                        {% else %}
+                            {% set y = plotTop + (plotHeight / 2) %}
+                        {% endif %}
+
+                        {% set yPercent = y / chartHeight * 100 %}
+
+                        <button
+                            type="button"
+                            class="analytics-chart__marker"
+                            style="left: {{ xPercent }}%; top: {{ yPercent }}%;"
+                            data-analytics-chart-point
+                            data-label="{{ item.label }}"
+                            data-views="{{ item.views }}"
+                            aria-label="{{ item.label }}: {{ item.views }} page views"
+                        >
+                            <span></span>
+                        </button>
+
+                    {% endfor %}
+                </div>
+
+                <div
+                    class="analytics-chart__tooltip"
+                    data-analytics-chart-tooltip
+                    hidden
+                >
+                    <strong data-analytics-chart-tooltip-label></strong>
+                    <span data-analytics-chart-tooltip-value></span>
+                </div>
+
+                <div class="analytics-chart__labels">
+                    <span>{{ dailyViews|first.label }}</span>
+
+                    <span>
+                        {{ dailyViews[(dailyViews|length / 2)|round(0, 'floor')].label }}
+                    </span>
+
+                    <span>{{ dailyViews|last.label }}</span>
+                </div>
+
             </div>
 
         {% elseif dailyViews|length == 1 %}
@@ -144,7 +257,19 @@
                 <tbody>
                     {% for page in topPages %}
                         <tr>
-                            <td>{{ page.title }}</td>
+                            <td>
+                                {% if page.path %}
+                                    <a
+                                        href="{{ siteUrl(page.path|trim('/')) }}"
+                                        target="_blank"
+                                        rel="noopener"
+                                    >
+                                        {{ page.title }}
+                                    </a>
+                                {% else %}
+                                    {{ page.title }}
+                                {% endif %}
+                            </td>
                             <td>{{ page.views|number_format }}</td>
                         </tr>
                     {% endfor %}

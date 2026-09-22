@@ -76,16 +76,26 @@
 }
 
 .analytics-chart {
-    height: 140px;
     margin-top: 12px;
+    position: relative;
     width: 100%;
 }
 
 .analytics-chart svg {
     display: block;
-    height: 100%;
+    height: 160px;
     overflow: visible;
     width: 100%;
+}
+
+.analytics-chart__area {
+    fill: url("#analytics-chart-gradient");
+}
+
+.analytics-chart__grid {
+    stroke: var(--gray-200);
+    stroke-width: 1;
+    vector-effect: non-scaling-stroke;
 }
 
 .analytics-chart__line {
@@ -95,6 +105,84 @@
     stroke-linejoin: round;
     stroke-width: 2;
     vector-effect: non-scaling-stroke;
+}
+
+.analytics-chart__markers {
+    inset: 0 0 26px;
+    pointer-events: none;
+    position: absolute;
+}
+
+.analytics-chart__marker {
+    appearance: none;
+    background: transparent;
+    border: 0;
+    cursor: default;
+    height: 24px;
+    margin: 0;
+    padding: 0;
+    pointer-events: auto;
+    position: absolute;
+    transform: translate(-50%, -50%);
+    width: 24px;
+}
+
+.analytics-chart__marker span {
+    background: var(--blue-500);
+    border: 2px solid var(--white);
+    border-radius: 50%;
+    display: block;
+    height: 12px;
+    left: 50%;
+    opacity: 0;
+    position: absolute;
+    top: 50%;
+    transform: translate(-50%, -50%);
+    width: 12px;
+}
+
+.analytics-chart__marker:hover span,
+.analytics-chart__marker:focus span {
+    opacity: 1;
+}
+
+.analytics-chart__tooltip {
+    background: var(--gray-900);
+    border-radius: 5px;
+    color: var(--white);
+    font-size: 12px;
+    line-height: 1.35;
+    padding: 7px 9px;
+    pointer-events: none;
+    position: absolute;
+    transform: translate(-50%, calc(-100% - 10px));
+    white-space: nowrap;
+    z-index: 2;
+}
+
+.analytics-chart__tooltip strong,
+.analytics-chart__tooltip span {
+    display: block;
+}
+
+.analytics-chart__tooltip span {
+    opacity: 0.8;
+}
+
+.analytics-chart__labels {
+    display: flex;
+    justify-content: space-between;
+    margin-top: 6px;
+    color: var(--gray-500);
+    font-size: 11px;
+}
+
+.analytics-chart__scale {
+    display: flex;
+    justify-content: space-between;
+    margin-top: 4px;
+    color: var(--gray-500);
+    font-size: 11px;
 }
 
 .analytics-widget__error {
