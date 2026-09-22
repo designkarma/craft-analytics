@@ -1,4 +1,4 @@
-# Analytics for Craft CMS
+# Google Analytics for Craft CMS
 
 A simple Google Analytics 4 dashboard for Craft CMS.
 

@@ -32,8 +32,8 @@
         }
     },
     "extra": {
-        "name": "Analytics",
-        "handle": "analytics",
+        "name": "Google Analytics",
+        "handle": "google-analytics",
         "class": "designkarma\\analytics\\Plugin",
         "developer": "DesignKarma",
         "developerUrl": "https://designkarma.co.uk"

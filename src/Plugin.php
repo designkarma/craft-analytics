@@ -44,7 +44,7 @@ class Plugin extends BasePlugin
         $analytics = new Analytics();
 
         return Craft::$app->getView()->renderTemplate(
-            'analytics/settings',
+            'google-analytics/settings',
             [
                 'settings' => $this->getSettings(),
                 'configuration' => $analytics->getConfigurationStatus(),

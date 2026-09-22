@@ -37,7 +37,7 @@ class AnalyticsWidget extends Widget
     public function getSettingsHtml(): ?string
     {
         return Craft::$app->getView()->renderTemplate(
-            'analytics/widgets/settings',
+            'google-analytics/widgets/settings',
             [
                 'widget' => $this,
             ]
@@ -61,7 +61,7 @@ class AnalyticsWidget extends Widget
             $overview = $analytics->getOverview($days);
 
             return Craft::$app->getView()->renderTemplate(
-                'analytics/widgets/analytics',
+                'google-analytics/widgets/analytics',
                 [
                     'days' => $days,
                     'propertyId' => $analytics->getPropertyId(),
@@ -81,7 +81,7 @@ class AnalyticsWidget extends Widget
             );
 
             return Craft::$app->getView()->renderTemplate(
-                'analytics/widgets/error',
+                'google-analytics/widgets/error',
                 [
                     'message' => Craft::$app
                         ->getConfig()
